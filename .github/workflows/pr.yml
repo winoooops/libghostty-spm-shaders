@@ -25,6 +25,9 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Check Manifest Resources
+        run: python3 Script/check-manifest-resources.py
+
       - name: Set up Xcode
         run: sudo xcode-select -s /Applications/Xcode.app
 
@@ -36,3 +39,16 @@ jobs:
 
       - name: Swift Test
         run: swift test
+
+      - name: Test Local Manifest Resources
+        run: |
+          XCFRAMEWORK=$(find .build/artifacts -type d -name GhosttyKit.xcframework)
+          if [ -z "$XCFRAMEWORK" ] || [ ! -d "$XCFRAMEWORK" ]; then
+            echo "[-] expected exactly one downloaded GhosttyKit XCFramework"
+            exit 1
+          fi
+          mkdir -p BinaryTarget
+          # Copy before changing manifests: SwiftPM may remove remote artifacts.
+          cp -R "$XCFRAMEWORK" BinaryTarget/GhosttyKit.xcframework
+          cp Package.local.swift Package.swift
+          swift test --filter GhosttyRuntimeResourcesTests
