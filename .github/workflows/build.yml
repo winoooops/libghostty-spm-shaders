@@ -28,6 +28,9 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Check Manifest Resources
+        run: python3 Script/check-manifest-resources.py
+
       - name: Resolve Release
         id: release
         run: |
